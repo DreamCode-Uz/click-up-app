@@ -1,7 +1,7 @@
 package uz.pdp.clickupsecondpart.entity.enums;
 
 public enum SystemRoleName {
-    ROLE_ADMIN,
-    ROLE_USER,
-    ROLE_MODER
+    SYSTEM_ADMIN,
+    SYSTEM_USER,
+    SYSTEM_MODER
 }

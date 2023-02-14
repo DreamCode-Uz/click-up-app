@@ -39,6 +39,8 @@ public class User extends AbsUUIDEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private SystemRoleName systemRoleName;
 
+    private String activationCode;
+
     @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
@@ -59,5 +61,12 @@ public class User extends AbsUUIDEntity implements UserDetails {
     @Override
     public String getUsername() {
         return this.email;
+    }
+
+    public User(String fullName, String email, String password, SystemRoleName systemRoleName) {
+        this.fullName = fullName;
+        this.email = email;
+        this.password = password;
+        this.systemRoleName = systemRoleName;
     }
 }

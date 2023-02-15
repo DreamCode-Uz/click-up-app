@@ -27,8 +27,8 @@ public class AuthController {
         return authService.register(registerRequest);
     }
 
-    @GetMapping("/verify/{code}")
-    public ResponseEntity<?> verifyEmailCode(@PathVariable(name = "code") String code) {
-        return authService.verifyEmailCode(code);
+    @GetMapping("/verify/c={code}/e={email}")
+    public ResponseEntity<?> verifyEmailCode(@PathVariable(name = "code") String code, @PathVariable(name = "email") String email) {
+        return authService.verifyEmailCode(code, email);
     }
 }

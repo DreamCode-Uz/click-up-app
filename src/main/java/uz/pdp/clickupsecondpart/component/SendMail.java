@@ -7,13 +7,13 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MailSender {
+public class SendMail {
 
-    private final JavaMailSender mailSender;
+    private final JavaMailSender javaMailSender;
 
     @Autowired
-    public MailSender(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    public SendMail(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
     }
 
     public boolean sendMail(String subject, String body, String to) {
@@ -23,7 +23,7 @@ public class MailSender {
             message.setTo(to);
             message.setSubject(subject);
             message.setText(body);
-            mailSender.send(message);
+            javaMailSender.send(message);
         } catch (MailException e) {
             return false;
         }

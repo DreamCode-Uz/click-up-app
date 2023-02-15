@@ -51,7 +51,7 @@ public class SecurityConfig {
         mailSender.setHost("smtp.gmail.com");
         mailSender.setPort(587);
         mailSender.setUsername("fullstack.dev.uz@gmail.com");
-        mailSender.setPassword(""); // https://myaccount.google.com/security   Google hisobiga kirish bo'limidan 2 bosqichli tekshiruvni yoqib keyin esa ilova yaratib shu yerdan paroll olasiz
+        mailSender.setPassword("ahxtgtkcdsftbmns"); // https://myaccount.google.com/security   Google hisobiga kirish bo'limidan 2 bosqichli tekshiruvni yoqib keyin esa ilova yaratib shu yerdan paroll olasiz
 
         Properties props = mailSender.getJavaMailProperties();
         props.setProperty("mail.transport.protocol", "smtp");
@@ -61,4 +61,6 @@ public class SecurityConfig {
 
         return mailSender;
     }
+
+//    ahxtgtkcdsftbmns
 }

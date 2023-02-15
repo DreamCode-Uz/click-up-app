@@ -30,7 +30,7 @@ public class User extends AbsUUIDEntity implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column
     private String color;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -42,7 +42,7 @@ public class User extends AbsUUIDEntity implements UserDetails {
     private String activationCode;
 
     @Column(name = "enabled", nullable = false)
-    private boolean enabled;
+    private boolean enabled = false;
 
     @Column(name = "account_non_expired", nullable = false)
     private boolean accountNonExpired = true;

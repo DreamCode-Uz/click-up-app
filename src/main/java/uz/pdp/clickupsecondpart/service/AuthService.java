@@ -7,17 +7,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import uz.pdp.clickupsecondpart.component.MailSender;
+import uz.pdp.clickupsecondpart.component.SendMail;
 import uz.pdp.clickupsecondpart.entity.User;
 import uz.pdp.clickupsecondpart.entity.enums.SystemRoleName;
 import uz.pdp.clickupsecondpart.payload.RegisterRequest;
 import uz.pdp.clickupsecondpart.repository.UserRepository;
 
+import java.util.Optional;
 import java.util.Random;
 
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
-import static org.springframework.http.ResponseEntity.status;
+import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.ResponseEntity.*;
 
 @Service
 public class AuthService implements UserDetailsService {
@@ -26,13 +26,14 @@ public class AuthService implements UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final MailSender mailSender;
+    @Autowired
+    private SendMail sendMail;
 
     @Autowired
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, MailSender mailSender) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.mailSender = mailSender;
+//        this.mailSender = mailSender;
     }
 
     @Override
@@ -49,19 +50,29 @@ public class AuthService implements UserDetailsService {
                 passwordEncoder.encode(request.getPassword()),
                 SystemRoleName.SYSTEM_USER
         );
-        int code = new Random().nextInt(6);
+        int code = new Random().nextInt(9999);
         System.out.println(code);
         user.setActivationCode(String.valueOf(code));
         user = userRepository.save(user);
-        mailSender.sendMail(
+        sendMail.sendMail(
                 "Account activation for the ClickUp project",
-                String.format("%s/%s", BASE_VERIFY_URL, code),
+                String.format("%s/c=%s/e=%s", BASE_VERIFY_URL, user.getActivationCode(), user.getEmail()),
                 user.getEmail()
         );
         return status(CREATED).body("User registered successfully");
     }
 
-    public ResponseEntity<?> verifyEmailCode(String code) {
-        return null;
+    public ResponseEntity<?> verifyEmailCode(String code, String email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isEmpty()) return status(NOT_FOUND).body("User not found");
+        User user = optionalUser.get();
+//        Ushbu holatda hisob oldin faollashtirilgan lekin keyinchalik hisob admin tomonida blocklanga bo'lishi mumkin!
+        if (user.getActivationCode() == null && !user.isEnabled())
+            return status(NOT_ACCEPTABLE).body("The user account cannot be activated because you do not have an active activation code. Please contact the developer if you want to know the reason.");
+        if (!user.getActivationCode().equals(code)) return badRequest().body("Invalid code");
+        user.setActivationCode(null);
+        user.setEnabled(true);
+        userRepository.save(user);
+        return ok("User verified successfully");
     }
 }

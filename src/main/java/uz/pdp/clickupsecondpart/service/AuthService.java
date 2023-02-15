@@ -1,15 +1,20 @@
 package uz.pdp.clickupsecondpart.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import uz.pdp.clickupsecondpart.component.JWTTokenProvider;
 import uz.pdp.clickupsecondpart.component.SendMail;
 import uz.pdp.clickupsecondpart.entity.User;
 import uz.pdp.clickupsecondpart.entity.enums.SystemRoleName;
+import uz.pdp.clickupsecondpart.payload.LoginRequest;
 import uz.pdp.clickupsecondpart.payload.RegisterRequest;
 import uz.pdp.clickupsecondpart.repository.UserRepository;
 
@@ -22,23 +27,44 @@ import static org.springframework.http.ResponseEntity.*;
 @Service
 public class AuthService implements UserDetailsService {
     private final String BASE_VERIFY_URL = "http://localhost:8080/api/auth/verify";
+
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final AuthenticationManager authenticationManager;
+
+    private final JWTTokenProvider tokenProvider;
 
     @Autowired
     private SendMail sendMail;
 
     @Autowired
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, @Lazy AuthenticationManager authenticationManager, JWTTokenProvider tokenProvider) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
 //        this.mailSender = mailSender;
+        this.authenticationManager = authenticationManager;
+        this.tokenProvider = tokenProvider;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return null;
+        return userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    public ResponseEntity<?> login(LoginRequest dto) {
+        try {
+            Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
+            User principal = (User) authenticate.getPrincipal();
+            return ok(tokenProvider.generateToken(principal.getEmail()));
+        } catch (DisabledException disabledException) {
+            return ResponseEntity.status(FORBIDDEN).body("User account disabled");
+        } catch (LockedException lockedException) {
+            return status(FORBIDDEN).body("User account locked");
+        } catch (BadCredentialsException badCredentialsException) {
+            return status(FORBIDDEN).body("Invalid email or password");
+        }
     }
 
     public ResponseEntity<?> register(RegisterRequest request) {
@@ -51,12 +77,11 @@ public class AuthService implements UserDetailsService {
                 SystemRoleName.SYSTEM_USER
         );
         int code = new Random().nextInt(9999);
-        System.out.println(code);
         user.setActivationCode(String.valueOf(code));
         user = userRepository.save(user);
         sendMail.sendMail(
                 "Account activation for the ClickUp project",
-                String.format("%s/c=%s/e=%s", BASE_VERIFY_URL, user.getActivationCode(), user.getEmail()),
+                String.format("%s?code=%s&email=%s", BASE_VERIFY_URL, user.getActivationCode(), user.getEmail()),
                 user.getEmail()
         );
         return status(CREATED).body("User registered successfully");

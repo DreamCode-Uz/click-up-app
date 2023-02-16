@@ -2,6 +2,7 @@ package uz.pdp.clickupsecondpart.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,6 +14,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import uz.pdp.clickupsecondpart.component.JWTTokenFilter;
 
 import java.util.Properties;
 
@@ -20,6 +23,12 @@ import java.util.Properties;
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
+
+    private final JWTTokenFilter jwtTokenFilter;
+
+    public SecurityConfig(@Lazy JWTTokenFilter jwtTokenFilter) {
+        this.jwtTokenFilter = jwtTokenFilter;
+    }
 
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -36,11 +45,17 @@ public class SecurityConfig {
         http
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/auth/**")
+                .requestMatchers(
+                        "/api/auth/**",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/api-docs/**"
+                )
                 .permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
+                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         return http.build();
     }
@@ -51,7 +66,7 @@ public class SecurityConfig {
         mailSender.setHost("smtp.gmail.com");
         mailSender.setPort(587);
         mailSender.setUsername("fullstack.dev.uz@gmail.com");
-        mailSender.setPassword(""); // https://myaccount.google.com/security   Google hisobiga kirish bo'limidan 2 bosqichli tekshiruvni yoqib keyin esa ilova yaratib shu yerdan paroll olasiz
+        mailSender.setPassword("ahxtgtkcdsftbmns"); // https://myaccount.google.com/security   Google hisobiga kirish bo'limidan 2 bosqichli tekshiruvni yoqib keyin esa ilova yaratib shu yerdan paroll olasiz
 
         Properties props = mailSender.getJavaMailProperties();
         props.setProperty("mail.transport.protocol", "smtp");
@@ -61,4 +76,6 @@ public class SecurityConfig {
 
         return mailSender;
     }
+
+//    ahxtgtkcdsftbmns
 }

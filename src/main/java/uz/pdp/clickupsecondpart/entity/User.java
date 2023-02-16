@@ -1,5 +1,6 @@
 package uz.pdp.clickupsecondpart.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,10 +28,11 @@ public class User extends AbsUUIDEntity implements UserDetails {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column
     private String color;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -42,7 +44,7 @@ public class User extends AbsUUIDEntity implements UserDetails {
     private String activationCode;
 
     @Column(name = "enabled", nullable = false)
-    private boolean enabled;
+    private boolean enabled = false;
 
     @Column(name = "account_non_expired", nullable = false)
     private boolean accountNonExpired = true;

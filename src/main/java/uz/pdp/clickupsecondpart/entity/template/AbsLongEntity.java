@@ -1,6 +1,5 @@
 package uz.pdp.clickupsecondpart.entity.template;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,7 +13,6 @@ import java.io.Serializable;
 @EqualsAndHashCode(callSuper = true)
 @MappedSuperclass
 @Data
-@JsonIgnoreProperties({"hibernateLazyInitializer", "id"})
 public abstract class AbsLongEntity extends AbsMainEntity implements Serializable {
 
     @Serial

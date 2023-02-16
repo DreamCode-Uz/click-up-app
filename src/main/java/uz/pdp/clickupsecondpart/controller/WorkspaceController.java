@@ -1,6 +1,8 @@
 package uz.pdp.clickupsecondpart.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +15,6 @@ import uz.pdp.clickupsecondpart.payload.WorkspaceDTO;
 import uz.pdp.clickupsecondpart.service.impl.WorkspaceServiceImpl;
 
 import java.util.UUID;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 
 @RestController
@@ -38,7 +38,8 @@ public class WorkspaceController {
 
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get workspace by id", tags = "workspace")
-    @GetMapping(value = "/{workspaceId}", produces = APPLICATION_JSON_VALUE)
+    @ApiResponse(responseCode = "404", description = "Workspace not found", content = @Content)
+    @GetMapping(value = "/{workspaceId}")
     public ResponseEntity<?> getWorkspace(@PathVariable(name = "workspaceId") Long workspaceId) {
         return service.getOne(workspaceId);
     }

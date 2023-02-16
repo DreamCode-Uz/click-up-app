@@ -7,15 +7,13 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import uz.pdp.clickupsecondpart.entity.template.AbsLongEntity;
 
-import java.io.Serializable;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_name", "owner_id"}))
-public class Workspace extends AbsLongEntity implements Serializable {
+public class Workspace extends AbsLongEntity {
 
     @Column(name = "workspace_name", nullable = false)
     private String name;
@@ -23,7 +21,7 @@ public class Workspace extends AbsLongEntity implements Serializable {
     @Column(nullable = false)
     private String color;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(optional = false)
     private User owner;
 
     @Column(name = "initial_letter", nullable = false)

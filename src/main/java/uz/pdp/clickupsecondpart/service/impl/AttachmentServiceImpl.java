@@ -16,7 +16,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.*;
-import static org.springframework.http.ResponseEntity.*;
+import static org.springframework.http.ResponseEntity.ok;
+import static org.springframework.http.ResponseEntity.status;
 
 @Service
 public class AttachmentServiceImpl implements AttachmentService {
@@ -34,7 +35,7 @@ public class AttachmentServiceImpl implements AttachmentService {
 
     @Override
     public ResponseEntity<?> getMyAttachments(UUID userId) {
-        List<Attachment> attachments = attachmentRepository.findAllByCreatedBy_Id(userId);
+        List<Attachment> attachments = attachmentRepository.findAllByCreatedBy(userId);
         return ok(attachments);
     }
 
@@ -71,6 +72,13 @@ public class AttachmentServiceImpl implements AttachmentService {
 
     @Override
     public ResponseEntity<?> deleteAttachment(UUID attachmentId) {
-        return null;
+        Optional<AttachmentContent> optionalAttachmentContent = contentRepository.findByAttachment_Id(attachmentId);
+        if (optionalAttachmentContent.isEmpty()) return status(NOT_FOUND).body("Attachment not found");
+        try {
+            contentRepository.delete(optionalAttachmentContent.get());
+            return status(NO_CONTENT).body("Attachment deleted");
+        } catch (Exception e) {
+            return status(INTERNAL_SERVER_ERROR).body("Error deleting file");
+        }
     }
 }

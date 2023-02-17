@@ -1,6 +1,5 @@
 package uz.pdp.clickupsecondpart.service.impl;
 
-import org.springdoc.api.OpenApiResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -31,6 +30,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     private final AttachmentRepository attachmentRepository;
 
+    private final AttachmentContentRepository contentRepository;
+
     private final WorkspaceUserRepository workspaceUserRepository;
 
     private final WorkspaceRoleRepository workspaceRoleRepository;
@@ -40,10 +41,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private final SendMail mail;
 
     @Autowired
-    public WorkspaceServiceImpl(WorkspaceRepository repository, UserRepository userRepository, AttachmentRepository attachmentRepository, WorkspaceUserRepository workspaceUserRepository, WorkspaceRoleRepository workspaceRoleRepository, WorkspacePermissionRepository workspacePermissionRepository, SendMail mail) {
+    public WorkspaceServiceImpl(WorkspaceRepository repository, UserRepository userRepository, AttachmentRepository attachmentRepository, AttachmentContentRepository contentRepository, WorkspaceUserRepository workspaceUserRepository, WorkspaceRoleRepository workspaceRoleRepository, WorkspacePermissionRepository workspacePermissionRepository, SendMail mail) {
         this.repository = repository;
         this.userRepository = userRepository;
         this.attachmentRepository = attachmentRepository;
+        this.contentRepository = contentRepository;
         this.workspaceUserRepository = workspaceUserRepository;
         this.workspaceRoleRepository = workspaceRoleRepository;
         this.workspacePermissionRepository = workspacePermissionRepository;
@@ -66,10 +68,17 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     public ResponseEntity<?> create(WorkspaceDTO dto, User user) {
         if (repository.existsByOwner_IdAndName(user.getId(), dto.getName()))
             return status(UNPROCESSABLE_ENTITY).body("Workspace already exists");
+
+        if (dto.getAvatarId() != null && !attachmentRepository.existsById(dto.getAvatarId()))
+            return status(NOT_FOUND).body("Avatar ID not found");
+
         Workspace workspace = repository.save(new Workspace(
-                dto.getName(), dto.getColor(), user,
-                dto.getAvatarId() == null ? null : attachmentRepository.findById(dto.getAvatarId()).orElseThrow(() -> new OpenApiResourceNotFoundException("Attachment not found"))
+                dto.getName(),
+                dto.getColor(),
+                user,
+                dto.getAvatarId()
         ));
+
         //  WORKSPACE ROLE OCHISH
         WorkspaceRole workspaceOwnerRole = workspaceRoleRepository.save(new WorkspaceRole(workspace, ROLE_OWNER.name(), null));
         WorkspaceRole workspaceAdminRole = workspaceRoleRepository.save(new WorkspaceRole(workspace, ROLE_ADMIN.name(), null));
@@ -111,10 +120,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         if (optionalWorkspace.isEmpty()) return status(NOT_FOUND).body("Workspace not found");
         Workspace workspace = optionalWorkspace.get();
         if (dto.getAvatarId() != null && attachmentRepository.existsById(dto.getAvatarId())) {
-            if (workspace.getAvatar() != null) {
-                attachmentRepository.delete(workspace.getAvatar());
+            if (workspace.getAvatarId() != null && contentRepository.existsByAttachment_Id(workspace.getAvatarId())) {
+                contentRepository.deleteByAttachmentId(workspace.getAvatarId());
             }
-            workspace.setAvatar(attachmentRepository.getReferenceById(dto.getAvatarId()));
+            workspace.setAvatarId(dto.getAvatarId());
         }
         workspace.setName(dto.getName());
         workspace.setColor(dto.getColor());
@@ -122,6 +131,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         return status(CREATED).body("Workspace edited");
     }
 
+    //    todo: change workspace coming...
     @Override
     public ResponseEntity<?> changeWorkspace(Long workspaceId, UUID userId) {
         return null;

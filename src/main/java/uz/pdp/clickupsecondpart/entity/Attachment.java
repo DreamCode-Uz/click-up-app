@@ -1,11 +1,13 @@
 package uz.pdp.clickupsecondpart.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import uz.pdp.clickupsecondpart.entity.template.AbsUUIDEntity;
 
 @AllArgsConstructor
@@ -25,4 +27,16 @@ public class Attachment extends AbsUUIDEntity {
     private String contentType;
 
     private Long size;
+
+    @JsonIgnore
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OneToOne(mappedBy = "attachment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private AttachmentContent content;
+
+    public Attachment(String name, String originalName, String contentType, Long size) {
+        this.name = name;
+        this.originalName = originalName;
+        this.contentType = contentType;
+        this.size = size;
+    }
 }

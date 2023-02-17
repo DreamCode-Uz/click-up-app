@@ -4,8 +4,11 @@ import org.springdoc.api.OpenApiResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uz.pdp.clickupsecondpart.component.SendMail;
 import uz.pdp.clickupsecondpart.entity.*;
+import uz.pdp.clickupsecondpart.entity.enums.ActionType;
 import uz.pdp.clickupsecondpart.entity.enums.WorkspacePermissionName;
+import uz.pdp.clickupsecondpart.payload.MemberDTO;
 import uz.pdp.clickupsecondpart.payload.WorkspaceDTO;
 import uz.pdp.clickupsecondpart.payload.resp.WorkspaceResponse;
 import uz.pdp.clickupsecondpart.repository.*;
@@ -34,14 +37,17 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     private final WorkspacePermissionRepository workspacePermissionRepository;
 
+    private final SendMail mail;
+
     @Autowired
-    public WorkspaceServiceImpl(WorkspaceRepository repository, UserRepository userRepository, AttachmentRepository attachmentRepository, WorkspaceUserRepository workspaceUserRepository, WorkspaceRoleRepository workspaceRoleRepository, WorkspacePermissionRepository workspacePermissionRepository) {
+    public WorkspaceServiceImpl(WorkspaceRepository repository, UserRepository userRepository, AttachmentRepository attachmentRepository, WorkspaceUserRepository workspaceUserRepository, WorkspaceRoleRepository workspaceRoleRepository, WorkspacePermissionRepository workspacePermissionRepository, SendMail mail) {
         this.repository = repository;
         this.userRepository = userRepository;
         this.attachmentRepository = attachmentRepository;
         this.workspaceUserRepository = workspaceUserRepository;
         this.workspaceRoleRepository = workspaceRoleRepository;
         this.workspacePermissionRepository = workspacePermissionRepository;
+        this.mail = mail;
     }
 
     @Override
@@ -101,12 +107,77 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     @Override
     public ResponseEntity<?> edit(Long workspaceId, WorkspaceDTO dto) {
-        return null;
+        Optional<Workspace> optionalWorkspace = repository.findById(workspaceId);
+        if (optionalWorkspace.isEmpty()) return status(NOT_FOUND).body("Workspace not found");
+        Workspace workspace = optionalWorkspace.get();
+        if (dto.getAvatarId() != null && attachmentRepository.existsById(dto.getAvatarId())) {
+            if (workspace.getAvatar() != null) {
+                attachmentRepository.delete(workspace.getAvatar());
+            }
+            workspace.setAvatar(attachmentRepository.getReferenceById(dto.getAvatarId()));
+        }
+        workspace.setName(dto.getName());
+        workspace.setColor(dto.getColor());
+        repository.save(workspace);
+        return status(CREATED).body("Workspace edited");
     }
 
     @Override
     public ResponseEntity<?> changeWorkspace(Long workspaceId, UUID userId) {
         return null;
+    }
+
+    @Override
+    public ResponseEntity<?> addOrEditOrRemoveWorkspaceUser(Long workspaceId, MemberDTO dto) {
+        Optional<Workspace> optionalWorkspace = repository.findById(workspaceId);
+        if (optionalWorkspace.isEmpty()) return status(NOT_FOUND).body("Workspace not found");
+        Optional<WorkspaceRole> optionalWorkspaceRole = workspaceRoleRepository.findById(dto.getRoleId());
+        if (optionalWorkspaceRole.isEmpty() && !dto.getActionType().equals(ActionType.DELETE))
+            return status(NOT_FOUND).body("Workspace role not found");
+
+        switch (dto.getActionType()) {
+            case ADD -> {
+                Optional<User> optionalUser = userRepository.findById(dto.getUserId());
+                if (optionalUser.isEmpty()) return status(NOT_FOUND).body("User not found");
+                WorkspaceUser workspaceUser = workspaceUserRepository.save(new WorkspaceUser(
+                        optionalWorkspace.get(),
+                        optionalUser.get(),
+                        optionalWorkspaceRole.get(),
+                        Timestamp.from(new Date().toInstant()),
+                        null
+                ));
+
+                String resp = String.format(WORKSPACE_JOINED_URL, workspaceId, workspaceUser.getId());
+                mail.sendMail("Workspace joined", resp, optionalUser.get().getEmail());
+                return status(CREATED).body("User added to workspace");
+            }
+            case EDIT -> {
+                Optional<WorkspaceUser> optionalWorkspaceUser = workspaceUserRepository.findByWorkspaceIdAndUserId(workspaceId, dto.getUserId());
+                if (optionalWorkspaceUser.isEmpty()) return status(NOT_FOUND).body("Workspace user not found");
+                WorkspaceUser workspaceUser = optionalWorkspaceUser.get();
+                workspaceUser.setWorkspaceRole(optionalWorkspaceRole.get());
+                workspaceUserRepository.save(workspaceUser);
+                return status(OK).body("User edited in workspace");
+            }
+            case DELETE -> {
+                workspaceUserRepository.deleteByWorkspaceIdAndUserId(workspaceId, dto.getUserId());
+                return status(NO_CONTENT).body("User deleted from workspace");
+            }
+            default -> {
+                return status(BAD_REQUEST).body("Invalid action type");
+            }
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> joinToWorkspace(Long workspaceId, UUID userId) {
+        if (!repository.existsById(workspaceId)) return status(NOT_FOUND).body("Workspace not found");
+        Optional<WorkspaceUser> optionalWorkspaceUser = workspaceUserRepository.findByWorkspaceIdAndUserId(workspaceId, userId);
+        if (optionalWorkspaceUser.isEmpty()) return status(NOT_FOUND).body("Workspace user not found");
+        WorkspaceUser workspaceUser = optionalWorkspaceUser.get();
+        workspaceUser.setDataJoined(Timestamp.from(new Date().toInstant()));
+        workspaceUserRepository.save(workspaceUser);
+        return status(CREATED).body("User joined to workspace");
     }
 
     @Override

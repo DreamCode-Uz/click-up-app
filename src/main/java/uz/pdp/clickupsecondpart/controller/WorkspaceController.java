@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.pdp.clickupsecondpart.aop.CurrentUser;
 import uz.pdp.clickupsecondpart.entity.User;
+import uz.pdp.clickupsecondpart.payload.MemberDTO;
 import uz.pdp.clickupsecondpart.payload.WorkspaceDTO;
 import uz.pdp.clickupsecondpart.service.impl.WorkspaceServiceImpl;
 
@@ -20,6 +22,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/workspace")
 @SecurityRequirement(name = "bearerAuth")
+@Tag(name = "Workspace", description = "Workspace controller")
 public class WorkspaceController {
 
     private final WorkspaceServiceImpl service;
@@ -30,41 +33,67 @@ public class WorkspaceController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Get all workspaces", tags = "workspace")
+    @Operation(summary = "Get all workspaces")
     @GetMapping
     public ResponseEntity<?> getWorkspaces() {
         return service.getAll();
     }
 
     @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Get workspace by id", tags = "workspace")
+    @Operation(summary = "Get workspace by id")
     @ApiResponse(responseCode = "404", description = "Workspace not found", content = @Content)
     @GetMapping(value = "/{workspaceId}")
     public ResponseEntity<?> getWorkspace(@PathVariable(name = "workspaceId") Long workspaceId) {
         return service.getOne(workspaceId);
     }
 
-    @Operation(summary = "Create workspace", tags = "workspace")
+    @Operation(summary = "Create workspace")
     @PostMapping
     public ResponseEntity<?> createWorkspace(@RequestBody @Valid WorkspaceDTO workspaceDTO, @CurrentUser User user) {
         return service.create(workspaceDTO, user);
     }
 
-    @Operation(summary = "Update workspace", tags = "workspace")
+    @Operation(summary = "Update workspace")
     @PutMapping("/{workspaceId}")
     public ResponseEntity<?> editWorkspace(@PathVariable(name = "workspaceId") Long id, @RequestBody @Valid WorkspaceDTO workspaceDTO) {
         return service.edit(id, workspaceDTO);
     }
 
-    @Operation(summary = "Change user workspace", tags = "workspace")
-    @PutMapping("/{workspaceId}/change")
-    public ResponseEntity<?> changeWorkspace(@PathVariable(name = "workspaceId") Long id, @RequestParam(name = "userId") UUID userId) {
+    @Operation(summary = "Change user workspace")
+    @PutMapping("/{workspaceId}/change/{userId}")
+    public ResponseEntity<?> changeWorkspace(@PathVariable(name = "workspaceId") Long id, @PathVariable(name = "userId") UUID userId) {
         return service.changeWorkspace(id, userId);
     }
 
-    @Operation(summary = "Delete workspace", tags = "workspace")
+    @Operation(summary = "Add, Edit, Delete member in workspace")
+    @PostMapping("/{workspaceId}/member")
+    public ResponseEntity<?> addOrEditAndDeleteWorkspaceUser(@PathVariable(name = "workspaceId") Long id, @RequestBody @Valid MemberDTO memberDTO) {
+        return service.addOrEditOrRemoveWorkspaceUser(id, memberDTO);
+    }
+
+    @Operation(summary = "Join workspace")
+    @GetMapping("/{workspaceId}/user/{userId}")
+    public ResponseEntity<?> joinWorkspace(@PathVariable(name = "workspaceId") Long id, @PathVariable(name = "userId") UUID userId) {
+        return service.joinToWorkspace(id, userId);
+    }
+
+    @Operation(summary = "Delete workspace")
     @DeleteMapping("/{workspaceId}")
     public ResponseEntity<?> deleteWorkspace(@PathVariable(name = "workspaceId") Long id) {
         return service.delete(id);
     }
 }
+
+
+/*
+    1-vazifa
+    Workspace edit qilish, ownerini o'zgartish, member va mehmonlarini ko'rish,
+    Workspacelari ro'yxatini olish, Workspace ga role qo'shish va
+    Workspace rolelarini permisison berish yoki olib tashlash kabi amallarni bajaruvchi method larni yozing.
+    Video darslikda ishlangan proyektni quyidagi link orqali yuklab oling:
+    https://github.com/sirojiddinEcma/app-clickup
+
+    2-vazifa
+    Space va Folder larni CRUD qilish, Folderga user qo'shish yoki edit qilish va
+    Folder dan user ni o'chirish kabi amallarni bajaruvchi method larni yozing.
+* */

@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import uz.pdp.clickupsecondpart.entity.template.AbsLongEntity;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -27,8 +29,7 @@ public class Workspace extends AbsLongEntity {
     @Column(name = "initial_letter", nullable = false)
     private String initialLetter;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    private Attachment avatar;
+    private UUID avatarId;
 
     @PrePersist
     @PreUpdate
@@ -36,10 +37,10 @@ public class Workspace extends AbsLongEntity {
         this.initialLetter = this.name.substring(0, 1);
     }
 
-    public Workspace(String name, String color, User owner, Attachment avatar) {
+    public Workspace(String name, String color, User owner, UUID avatarId) {
         this.name = name;
         this.color = color;
         this.owner = owner;
-        this.avatar = avatar;
+        this.avatarId = avatarId;
     }
 }

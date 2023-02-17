@@ -1,9 +1,6 @@
 package uz.pdp.clickupsecondpart.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Lob;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,9 +14,18 @@ import uz.pdp.clickupsecondpart.entity.template.AbsLongEntity;
 @Entity
 public class AttachmentContent extends AbsLongEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @OneToOne(optional = false, cascade = CascadeType.ALL)
     private Attachment attachment;
 
     @Lob
     private byte[] content;
+
+    public AttachmentContent(Attachment attachment, byte[] content) {
+        this.attachment = attachment;
+        this.content = content;
+    }
 }

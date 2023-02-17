@@ -9,9 +9,9 @@ public interface AttachmentService {
 
     ResponseEntity<?> getMyAttachments(UUID userId);
 
-    ResponseEntity<?> getAttachment(Long attachmentId);
+    ResponseEntity<?> getAttachment(UUID attachmentId);
 
     ResponseEntity<?> uploadAttachment(MultipartFile file);
 
-    ResponseEntity<?> deleteAttachment(Long attachmentId);
+    ResponseEntity<?> deleteAttachment(UUID attachmentId);
 }

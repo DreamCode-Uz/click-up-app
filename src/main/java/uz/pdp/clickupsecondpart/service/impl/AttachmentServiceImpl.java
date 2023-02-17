@@ -31,7 +31,7 @@ public class AttachmentServiceImpl implements AttachmentService {
     }
 
     @Override
-    public ResponseEntity<?> getAttachment(Long attachmentId) {
+    public ResponseEntity<?> getAttachment(UUID attachmentId) {
         return null;
     }
 
@@ -41,7 +41,7 @@ public class AttachmentServiceImpl implements AttachmentService {
     }
 
     @Override
-    public ResponseEntity<?> deleteAttachment(Long attachmentId) {
+    public ResponseEntity<?> deleteAttachment(UUID attachmentId) {
         return null;
     }
 }

@@ -4,11 +4,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import uz.pdp.clickupsecondpart.entity.Attachment;
+import uz.pdp.clickupsecondpart.entity.AttachmentContent;
 import uz.pdp.clickupsecondpart.repository.AttachmentContentRepository;
 import uz.pdp.clickupsecondpart.repository.AttachmentRepository;
 import uz.pdp.clickupsecondpart.service.AttachmentService;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+
+import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.ResponseEntity.*;
 
 @Service
 public class AttachmentServiceImpl implements AttachmentService {
@@ -26,18 +34,39 @@ public class AttachmentServiceImpl implements AttachmentService {
 
     @Override
     public ResponseEntity<?> getMyAttachments(UUID userId) {
-
-        return null;
+        List<Attachment> attachments = attachmentRepository.findAllByCreatedBy_Id(userId);
+        return ok(attachments);
     }
 
     @Override
     public ResponseEntity<?> getAttachment(UUID attachmentId) {
-        return null;
+        Optional<Attachment> optionalAttachment = attachmentRepository.findById(attachmentId);
+        if (optionalAttachment.isEmpty()) return status(NOT_FOUND).body("Attachment not found");
+        return ok(optionalAttachment.get());
     }
 
     @Override
     public ResponseEntity<?> uploadAttachment(MultipartFile file) {
-        return null;
+        if (file.isEmpty()) {
+            return status(BAD_REQUEST).body("File not empty");
+        }
+        Attachment attachment = new Attachment(
+                file.getName(),
+                file.getOriginalFilename(),
+                file.getContentType(),
+                file.getSize()
+        );
+
+        try {
+            AttachmentContent content = new AttachmentContent(
+                    attachment,
+                    file.getBytes()
+            );
+            AttachmentContent save = contentRepository.save(content);
+            return status(CREATED).body(save.getAttachment());
+        } catch (IOException e) {
+            return status(SERVICE_UNAVAILABLE).body("Error uploading file");
+        }
     }
 
     @Override

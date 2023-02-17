@@ -4,13 +4,14 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import uz.pdp.clickupsecondpart.entity.User;
 
 import java.sql.Timestamp;
 
 @MappedSuperclass
 @Data
-//@EntityListeners(AuditingEntityListener.class)
+@EntityListeners(AuditingEntityListener.class)
 public abstract class AbsMainEntity {
 
     @Column(nullable = false, updatable = false, name = "created_at")

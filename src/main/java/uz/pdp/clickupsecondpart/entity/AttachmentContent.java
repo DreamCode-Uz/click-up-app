@@ -2,6 +2,7 @@ package uz.pdp.clickupsecondpart.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,4 +19,7 @@ public class AttachmentContent extends AbsLongEntity {
 
     @OneToOne(optional = false, cascade = CascadeType.ALL)
     private Attachment attachment;
+
+    @Lob
+    private byte[] content;
 }

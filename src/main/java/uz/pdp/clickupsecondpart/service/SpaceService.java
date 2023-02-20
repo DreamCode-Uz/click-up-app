@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface SpaceService {
 
-    ResponseEntity<?> getAllSpaces(Long workspaceId);
+    ResponseEntity<?> getAllSpaces(Long workspaceId, User user);
 
     ResponseEntity<?> getSpace(UUID spaceId);
 

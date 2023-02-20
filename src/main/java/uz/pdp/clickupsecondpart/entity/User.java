@@ -2,10 +2,8 @@ package uz.pdp.clickupsecondpart.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.Hibernate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,12 +11,15 @@ import uz.pdp.clickupsecondpart.entity.enums.SystemRoleName;
 import uz.pdp.clickupsecondpart.entity.template.AbsUUIDEntity;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Entity(name = "users")
 public class User extends AbsUUIDEntity implements UserDetails {
 
@@ -36,6 +37,7 @@ public class User extends AbsUUIDEntity implements UserDetails {
     private String color;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     private Attachment avatar;
 
     @Enumerated(EnumType.STRING)
@@ -70,5 +72,18 @@ public class User extends AbsUUIDEntity implements UserDetails {
         this.email = email;
         this.password = password;
         this.systemRoleName = systemRoleName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        User user = (User) o;
+        return getId() != null && Objects.equals(getId(), user.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

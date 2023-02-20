@@ -20,7 +20,6 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @Entity
 public class ProjectUser extends AbsUUIDEntity {
 
@@ -28,7 +27,7 @@ public class ProjectUser extends AbsUUIDEntity {
     private Project project;
 
     @ManyToOne(optional = false)
-    private Space space;
+    private User user;
 
     @Enumerated(EnumType.STRING)
     private TaskPermission taskPermission;

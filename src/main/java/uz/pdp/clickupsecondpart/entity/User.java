@@ -19,7 +19,6 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @Entity(name = "users")
 public class User extends AbsUUIDEntity implements UserDetails {
 

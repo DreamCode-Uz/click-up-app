@@ -29,10 +29,10 @@ public class SpaceController {
         this.spaceService = spaceService;
     }
 
-    @GetMapping("/{workspaceId}")
+    @GetMapping("/workspace/{workspaceId}")
     @Operation(summary = "Get all spaces")
-    public ResponseEntity<?> getAllSpaces(@PathVariable Long workspaceId) {
-        return spaceService.getAllSpaces(workspaceId);
+    public ResponseEntity<?> getAllSpaces(@PathVariable Long workspaceId, @CurrentUser User user) {
+        return spaceService.getAllSpaces(workspaceId, user);
     }
 
     @GetMapping("/{spaceId}")

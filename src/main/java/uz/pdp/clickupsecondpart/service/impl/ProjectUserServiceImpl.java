@@ -54,7 +54,14 @@ public class ProjectUserServiceImpl implements ProjectUserService {
 
     @Override
     public ResponseEntity<?> editProjectUser(UUID projectUserId, UUID userId, User user) {
-        return null;
+        Optional<ProjectUser> optionalProjectUser = projectUserRepository.findByProjectIdAndCreatedBy(projectUserId, user.getId());
+        if (optionalProjectUser.isEmpty()) return status(NOT_FOUND).body("Project user not found");
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) return status(NOT_FOUND).body("User not found");
+        ProjectUser projectUser = optionalProjectUser.get();
+        projectUser.setUser(optionalUser.get());
+        projectUser = projectUserRepository.save(projectUser);
+        return status(CREATED).body(projectUser);
     }
 
     @Override
@@ -63,6 +70,7 @@ public class ProjectUserServiceImpl implements ProjectUserService {
             return status(BAD_REQUEST).body("Project user not deleted");
         Optional<ProjectUser> optionalProjectUser = projectUserRepository.findById(projectUserId);
         if (optionalProjectUser.isEmpty()) return status(NOT_FOUND).body("Project user not found");
-        return null;
+        projectUserRepository.delete(optionalProjectUser.get());
+        return status(NO_CONTENT).body("Project user deleted");
     }
 }

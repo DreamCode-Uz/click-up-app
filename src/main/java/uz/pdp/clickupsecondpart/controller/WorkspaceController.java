@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import uz.pdp.clickupsecondpart.aop.CurrentUser;
 import uz.pdp.clickupsecondpart.entity.User;
 import uz.pdp.clickupsecondpart.payload.MemberDTO;
 import uz.pdp.clickupsecondpart.payload.WorkspaceDTO;
+import uz.pdp.clickupsecondpart.payload.WorkspaceRoleDTO;
 import uz.pdp.clickupsecondpart.service.impl.WorkspaceServiceImpl;
 
 import java.util.UUID;
@@ -86,5 +88,10 @@ public class WorkspaceController {
     @GetMapping("/{workspaceId}/member")
     public ResponseEntity<?> getWorkspaceMembers(@PathVariable(name = "workspaceId") Long id) {
         return service.getWorkspaceMembers(id);
+    }
+
+    @PostMapping(value = "/role", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> addOrRemovePermissionToRole(@RequestBody @Valid WorkspaceRoleDTO workspaceRoleDTO) {
+        return service.addOrRemovePermissionToRole(workspaceRoleDTO);
     }
 }

@@ -9,6 +9,7 @@ import uz.pdp.clickupsecondpart.entity.enums.ActionType;
 import uz.pdp.clickupsecondpart.entity.enums.WorkspacePermissionName;
 import uz.pdp.clickupsecondpart.payload.MemberDTO;
 import uz.pdp.clickupsecondpart.payload.WorkspaceDTO;
+import uz.pdp.clickupsecondpart.payload.WorkspaceRoleDTO;
 import uz.pdp.clickupsecondpart.payload.resp.WorkspaceResponse;
 import uz.pdp.clickupsecondpart.repository.*;
 import uz.pdp.clickupsecondpart.service.WorkspaceService;
@@ -208,5 +209,26 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         if (!repository.existsById(workspaceId)) return status(NOT_FOUND).body("Workspace not found");
         List<WorkspaceUser> optionalWorkspaceUser = workspaceUserRepository.findAllByWorkspaceId(workspaceId);
         return ok(optionalWorkspaceUser.stream().map(MemberDTO::new));
+    }
+
+    public ResponseEntity<?> addOrRemovePermissionToRole(WorkspaceRoleDTO dto) {
+        Optional<WorkspaceRole> optionalWorkspaceRole = workspaceRoleRepository.findById(dto.getId());
+        if (optionalWorkspaceRole.isEmpty()) return status(NOT_FOUND).body("Workspace role not found");
+        Optional<WorkspacePermission> optionalWorkspacePermission = workspacePermissionRepository.findByWorkspaceRole_IdAndPermissionType(dto.getId(), dto.getPermissionName());
+        if (dto.getActionType().equals(ActionType.ADD)) {
+            if (optionalWorkspacePermission.isPresent())
+                return status(UNPROCESSABLE_ENTITY).body("Workspace permission already added");
+            WorkspacePermission workspacePermission = new WorkspacePermission(optionalWorkspaceRole.get(), dto.getPermissionName());
+            workspacePermissionRepository.save(workspacePermission);
+            return status(CREATED).body("Workspace permission added");
+        } else if (dto.getActionType().equals(ActionType.DELETE)) {
+            if (optionalWorkspacePermission.isPresent()) {
+                workspacePermissionRepository.delete(optionalWorkspacePermission.get());
+                return status(NO_CONTENT).body("Workspace permission deleted");
+            }
+            return status(NOT_FOUND).body("Workspace permission not found");
+        } else {
+            return status(BAD_REQUEST).body("Invalid action type");
+        }
     }
 }

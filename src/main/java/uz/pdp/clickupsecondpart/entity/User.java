@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import uz.pdp.clickupsecondpart.entity.enums.SystemRoleName;
 import uz.pdp.clickupsecondpart.entity.template.AbsUUIDEntity;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
@@ -34,6 +35,8 @@ public class User extends AbsUUIDEntity implements UserDetails {
 
     @Column
     private String color;
+
+    private Timestamp lastActivity;
 
     @OneToOne(fetch = FetchType.LAZY)
     @ToString.Exclude

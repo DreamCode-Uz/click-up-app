@@ -15,6 +15,7 @@ import uz.pdp.clickupsecondpart.service.WorkspaceService;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.ResponseEntity.ok;
@@ -52,9 +53,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         this.mail = mail;
     }
 
-    @Override
-    public ResponseEntity<?> getAll() {
-        return null;
+    public ResponseEntity<?> getAllMyWorkspace(User user) {
+        Stream<WorkspaceDTO> workspaceDTOStream = repository.findAllByOwner_Id(user.getId()).stream().map(WorkspaceDTO::new);
+        return ok(workspaceDTOStream);
     }
 
     @Override
@@ -200,5 +201,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         } catch (Exception e) {
             return status(BAD_REQUEST).body("Workspace not deleted");
         }
+    }
+
+    @Override
+    public ResponseEntity<?> getWorkspaceMembers(Long workspaceId) {
+        if (!repository.existsById(workspaceId)) return status(NOT_FOUND).body("Workspace not found");
+        List<WorkspaceUser> optionalWorkspaceUser = workspaceUserRepository.findAllByWorkspaceId(workspaceId);
+        return ok(optionalWorkspaceUser.stream().map(MemberDTO::new));
     }
 }

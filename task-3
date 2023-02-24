@@ -1,0 +1,12 @@
+1-vazifa
+
+Status va tasklarni qo'shish, Task statusini o'zgartirish,
+Task ga file biriktirish, biriktirilgan file ni o'chirish,
+Task ga comment yoki tag qo'shish uni edit qilish va o'chirish,
+ task ga user assign qilish va  assign qilingan user ni olib tashlash kabi amallarni bajaruvchi
+  method larni yozing.
+
+  2-vazifa
+
+  Checklist qo'shish, edit qilish, delete qilish, checklist ga item qo'shish, qo'shilgan item ni delete qilish,
+   checklistga assign qilish va space bo'yicha viewlarn olish kabi amallarni bajaruvchi method larni yozing.

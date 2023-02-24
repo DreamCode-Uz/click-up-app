@@ -1,18 +1,18 @@
 package uz.pdp.clickupsecondpart.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.Hibernate;
 import uz.pdp.clickupsecondpart.entity.template.AbsLongEntity;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_name", "owner_id"}))
 public class Workspace extends AbsLongEntity {
@@ -42,5 +42,18 @@ public class Workspace extends AbsLongEntity {
         this.color = color;
         this.owner = owner;
         this.avatarId = avatarId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Workspace workspace = (Workspace) o;
+        return getId() != null && Objects.equals(getId(), workspace.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

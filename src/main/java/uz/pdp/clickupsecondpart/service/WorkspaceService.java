@@ -11,7 +11,7 @@ public interface WorkspaceService {
 
     String WORKSPACE_JOINED_URL = "http://localhost:8080/api/workspace/%s/user/%s";
 
-    ResponseEntity<?> getAll();
+    ResponseEntity<?> getAllMyWorkspace(User user);
 
     ResponseEntity<?> getOne(Long workspaceId);
 
@@ -26,4 +26,6 @@ public interface WorkspaceService {
     ResponseEntity<?> joinToWorkspace(Long workspaceId, UUID userId);
 
     ResponseEntity<?> delete(Long workspaceId);
+
+    ResponseEntity<?> getWorkspaceMembers(Long workspaceId);
 }

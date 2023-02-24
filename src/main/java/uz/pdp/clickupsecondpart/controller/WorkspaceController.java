@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import uz.pdp.clickupsecondpart.aop.CurrentUser;
 import uz.pdp.clickupsecondpart.entity.User;
 import uz.pdp.clickupsecondpart.payload.MemberDTO;
 import uz.pdp.clickupsecondpart.payload.WorkspaceDTO;
+import uz.pdp.clickupsecondpart.payload.WorkspaceRoleDTO;
 import uz.pdp.clickupsecondpart.service.impl.WorkspaceServiceImpl;
 
 import java.util.UUID;
@@ -33,10 +35,10 @@ public class WorkspaceController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Get all workspaces")
+    @Operation(summary = "Get all my workspaces")
     @GetMapping
-    public ResponseEntity<?> getWorkspaces() {
-        return service.getAll();
+    public ResponseEntity<?> getWorkspaces(@CurrentUser User user) {
+        return service.getAllMyWorkspace(user);
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -82,18 +84,14 @@ public class WorkspaceController {
     public ResponseEntity<?> deleteWorkspace(@PathVariable(name = "workspaceId") Long id) {
         return service.delete(id);
     }
+
+    @GetMapping("/{workspaceId}/member")
+    public ResponseEntity<?> getWorkspaceMembers(@PathVariable(name = "workspaceId") Long id) {
+        return service.getWorkspaceMembers(id);
+    }
+
+    @PostMapping(value = "/role", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> addOrRemovePermissionToRole(@RequestBody @Valid WorkspaceRoleDTO workspaceRoleDTO) {
+        return service.addOrRemovePermissionToRole(workspaceRoleDTO);
+    }
 }
-
-
-/*
-    1-vazifa
-    Workspace edit qilish, ownerini o'zgartish, member va mehmonlarini ko'rish,
-    Workspacelari ro'yxatini olish, Workspace ga role qo'shish va
-    Workspace rolelarini permisison berish yoki olib tashlash kabi amallarni bajaruvchi method larni yozing.
-    Video darslikda ishlangan proyektni quyidagi link orqali yuklab oling:
-    https://github.com/sirojiddinEcma/app-clickup
-
-    2-vazifa
-    Space va Folder larni CRUD qilish, Folderga user qo'shish yoki edit qilish va
-    Folder dan user ni o'chirish kabi amallarni bajaruvchi method larni yozing.
-* */

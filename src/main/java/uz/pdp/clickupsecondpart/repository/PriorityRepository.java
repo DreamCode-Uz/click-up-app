@@ -6,4 +6,6 @@ import uz.pdp.clickupsecondpart.entity.Priority;
 
 @Repository
 public interface PriorityRepository extends JpaRepository<Priority, Long> {
+
+    boolean existsByName(String name);
 }

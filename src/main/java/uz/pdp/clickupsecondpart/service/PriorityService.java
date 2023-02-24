@@ -11,5 +11,5 @@ public interface PriorityService {
 
     ResponseEntity<?> addPriority(PriorityDTO priorityDTO);
 
-    ResponseEntity<?> updatePriority(Long priorityId);
+    ResponseEntity<?> updatePriority(Long priorityId, PriorityDTO priorityDTO);
 }

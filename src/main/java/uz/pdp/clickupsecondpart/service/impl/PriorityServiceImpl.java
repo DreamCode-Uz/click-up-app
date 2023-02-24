@@ -3,6 +3,7 @@ package uz.pdp.clickupsecondpart.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uz.pdp.clickupsecondpart.entity.Icons;
 import uz.pdp.clickupsecondpart.entity.Priority;
 import uz.pdp.clickupsecondpart.payload.PriorityDTO;
 import uz.pdp.clickupsecondpart.repository.IconsRepository;
@@ -43,11 +44,24 @@ public class PriorityServiceImpl implements PriorityService {
 
     @Override
     public ResponseEntity<?> addPriority(PriorityDTO priorityDTO) {
-        return null;
+        if (priorityRepository.existsByName(priorityDTO.getName()))
+            return status(NOT_FOUND).body("Priority already exists");
+        Optional<Icons> optionalIcons = iconsRepository.findById(priorityDTO.getIconId());
+        if (optionalIcons.isEmpty()) return status(NOT_FOUND).body("Icon not found");
+        Priority save = priorityRepository.save(new Priority(priorityDTO.getName(), priorityDTO.getName(), optionalIcons.get()));
+        return status(CREATED).body(save);
     }
 
     @Override
-    public ResponseEntity<?> updatePriority(Long priorityId) {
-        return null;
+    public ResponseEntity<?> updatePriority(Long priorityId, PriorityDTO dto) {
+        Optional<Priority> optionalPriority = priorityRepository.findById(priorityId);
+        if (optionalPriority.isEmpty()) return status(NOT_FOUND).body("Priority not found");
+        Priority priority = optionalPriority.get();
+        priority.setName(dto.getName());
+        priority.setColor(dto.getColor());
+        Optional<Icons> optionalIcons = iconsRepository.findById(dto.getIconId());
+        optionalIcons.ifPresent(priority::setIcon);
+        priority = priorityRepository.save(priority);
+        return status(CREATED).body(priority);
     }
 }

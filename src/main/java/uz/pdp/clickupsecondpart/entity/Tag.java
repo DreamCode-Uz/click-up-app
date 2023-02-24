@@ -1,9 +1,6 @@
 package uz.pdp.clickupsecondpart.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
 import uz.pdp.clickupsecondpart.entity.template.AbsLongEntity;
@@ -16,6 +13,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @Entity
+@Table(name = "tag", uniqueConstraints = {@UniqueConstraint(columnNames = {"workspace_id", "name"})})
 public class Tag extends AbsLongEntity {
 
     @Column(name = "name", nullable = false)

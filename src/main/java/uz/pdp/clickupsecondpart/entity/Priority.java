@@ -6,7 +6,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import lombok.*;
 import org.hibernate.Hibernate;
-import uz.pdp.clickupsecondpart.entity.template.AbsUUIDEntity;
+import uz.pdp.clickupsecondpart.entity.template.AbsLongEntity;
 
 import java.util.Objects;
 
@@ -16,10 +16,13 @@ import java.util.Objects;
 @Setter
 @ToString
 @Entity
-public class Priority extends AbsUUIDEntity {
+public class Priority extends AbsLongEntity {
+
+    @Column(nullable = false, unique = true)
+    private String name;
 
     @Column(nullable = false)
-    private String name;
+    private String color;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude

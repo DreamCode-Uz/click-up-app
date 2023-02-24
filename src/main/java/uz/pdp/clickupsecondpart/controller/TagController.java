@@ -14,7 +14,7 @@ import uz.pdp.clickupsecondpart.service.impl.TagServiceImpl;
 @RestController
 @RequestMapping("/api/tag")
 @Tag(name = "Tag Controller")
-@SecurityRequirement(name = "bearAuth")
+@SecurityRequirement(name = "bearerAuth")
 public class TagController implements TagService {
 
     private final TagServiceImpl service;

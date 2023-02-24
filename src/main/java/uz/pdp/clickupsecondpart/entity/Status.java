@@ -14,6 +14,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @Entity
+@Table(name = "status", uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "project_id"})})
 public class Status extends AbsLongEntity {
 
     @Column(nullable = false)

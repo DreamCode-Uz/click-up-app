@@ -36,7 +36,7 @@ public class Task extends AbsUUIDEntity {
     private Long estimateTime;
 
     @Column(name = "active_date")
-    private LocalDate activeDate;
+    private Timestamp activeDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude

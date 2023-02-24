@@ -35,5 +35,5 @@ public class TaskDTO {
     @NotNull
     private Long estimateTime;
 
-    private String activeDate;
+    private Date activeDate;
 }

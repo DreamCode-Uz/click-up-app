@@ -41,7 +41,7 @@ public class PriorityController implements PriorityService {
         return service.addPriority(priorityDTO);
     }
 
-    @GetMapping("/{priorityId}")
+    @PutMapping("/{priorityId}")
     @Override
     public ResponseEntity<?> updatePriority(@PathVariable Long priorityId, @RequestBody @Valid PriorityDTO priorityDTO) {
         return service.updatePriority(priorityId, priorityDTO);

@@ -1,5 +1,6 @@
 package uz.pdp.clickupsecondpart.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
@@ -19,16 +20,22 @@ import java.util.Objects;
 @Entity
 public class Task extends AbsUUIDEntity {
 
+    @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "description")
     private String description;
 
+    @Column(name = "started_date")
     private Timestamp startedDate;
 
+    @Column(name = "due_time_has")
     private Timestamp dueTimeHas;
 
+    @Column(name = "estimate_time")
     private Long estimateTime;
 
+    @Column(name = "active_date")
     private LocalDate activeDate;
 
     @ManyToOne(fetch = FetchType.LAZY)

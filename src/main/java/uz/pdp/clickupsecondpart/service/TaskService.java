@@ -22,7 +22,7 @@ public interface TaskService {
 
     ResponseEntity<?> uploadTaskAttachment(UUID taskId, MultipartFile file);
 
-    ResponseEntity<?> removeTaskAttachment(UUID attachmentId);
+    ResponseEntity<?> removeTaskAttachment(UUID taskId, UUID attachmentId);
 
     ResponseEntity<?> addTaskTag(UUID taskId, Long tagId);
 }

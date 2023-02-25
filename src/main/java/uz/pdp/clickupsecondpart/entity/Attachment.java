@@ -1,19 +1,23 @@
 package uz.pdp.clickupsecondpart.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
+import lombok.*;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import uz.pdp.clickupsecondpart.entity.template.AbsUUIDEntity;
 
+import java.util.Objects;
+
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@ToString
 @Entity
 public class Attachment extends AbsUUIDEntity {
 
@@ -30,7 +34,7 @@ public class Attachment extends AbsUUIDEntity {
 
     @JsonIgnore
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @OneToOne(mappedBy = "attachment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "attachment", cascade = CascadeType.ALL)
     private AttachmentContent content;
 
     public Attachment(String name, String originalName, String contentType, Long size) {
@@ -38,5 +42,18 @@ public class Attachment extends AbsUUIDEntity {
         this.originalName = originalName;
         this.contentType = contentType;
         this.size = size;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Attachment that = (Attachment) o;
+        return getId() != null && Objects.equals(getId(), that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

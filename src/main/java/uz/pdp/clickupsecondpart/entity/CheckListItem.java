@@ -26,11 +26,17 @@ public class CheckListItem extends AbsUUIDEntity {
     private CheckList checkList;
 
     @Column(nullable = false)
-    private boolean resolved;
+    private boolean resolved = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     private User assignedUser;
+
+    public CheckListItem(String name, CheckList checkList, boolean resolved) {
+        this.name = name;
+        this.checkList = checkList;
+        this.resolved = resolved;
+    }
 
     @Override
     public boolean equals(Object o) {

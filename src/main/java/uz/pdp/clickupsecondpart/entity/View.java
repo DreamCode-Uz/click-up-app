@@ -1,5 +1,6 @@
 package uz.pdp.clickupsecondpart.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToOne;
@@ -17,6 +18,7 @@ import java.util.Objects;
 @Entity
 public class View extends AbsUUIDEntity {
 
+    @Column(nullable = false)
     private String name;
 
     @OneToOne(fetch = FetchType.LAZY)
